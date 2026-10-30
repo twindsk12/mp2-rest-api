@@ -37,28 +37,6 @@ async def log_requests(request: Request, call_next):
     # TODO 3: Log that message at ERROR for 5xx, WARNING for 4xx,
     # and INFO for other responses.
 
-    request_id = uuid.uuid4().hex[:8]
-    request.state.request_id = request_id
-
-    started = time.perf_counter()
-
-    try:
-        response = await call_next(request)
-
-    except Exception:
-        logger.error(
-            "Unexpected exception: request_id=%s",
-            request_id,
-            exc_info=True,
-        )
-
-        response = JSONResponse(
-            status_code=500,
-            content={"detail": "Internal server error"},
-        )
-
-    duration_ms = (time.perf_counter() - started) * 1000
-
     message = (
         f"request_id={request_id} "
         f"{request.method} "
@@ -67,6 +45,8 @@ async def log_requests(request: Request, call_next):
         f"duration={duration_ms:.1f}ms"
     )
 
+    # TODO 3: Log that message at ERROR for 5xx, WARNING for 4xx,
+    # and INFO for other responses.
     if response.status_code >= 500:
         logger.error(message)
 
